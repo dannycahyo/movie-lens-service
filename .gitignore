@@ -4,3 +4,6 @@
 
 # Ignore build files
 /dist
+
+# Ignore environment variables
+.env
