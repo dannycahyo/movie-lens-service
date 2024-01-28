@@ -36,8 +36,6 @@ export class MovieRepositoryImpl implements MovieRepository {
     } catch (error) {
       console.error(`Error on MovieRepositoryImpl.getMovies(): ${error}`);
       throw error;
-    } finally {
-      pool.end();
     }
   }
 }
