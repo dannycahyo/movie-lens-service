@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { MovieUseCases } from "../../application/usecases/movieUseCases";
-import { MovieDtoSchema, type MovieDto } from "../dtos/movieDto";
-import {
-  MovieRequestParamsSchema,
-  type MovieRequestParams,
-} from "./types/movieRequestParams";
+import { MovieDtoSchema } from "../dtos/movieDto";
+import { MovieRequestParamsSchema } from "./types/movieRequestParams";
 import { MovieRepositoryImpl } from "../../infrastructure/database/movieRepositoryImpl";
 import { convertObjectToCamelCase } from "../../utils/convertObjectToCamelCase";
+import { sendSuccess } from "../../utils/sendResponses";
 
+import type { MovieDto } from "../dtos/movieDto";
+import type { MovieRequestParams } from "./types/movieRequestParams";
 import type { Request, Response } from "express";
 
 const movieRepository = new MovieRepositoryImpl();
@@ -24,7 +24,11 @@ export const getMovies = async (req: Request, res: Response): Promise<void> => {
       MovieDtoSchema.parse(convertObjectToCamelCase(movie)),
     );
 
-    res.status(200).json(moviesDto);
+    sendSuccess({
+      res,
+      message: "Movies retrieved successfully.",
+      data: moviesDto,
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ error: "Bad Request", details: error.errors });
@@ -49,7 +53,11 @@ export const getMovieById = async (
       const movieDto: MovieDto = MovieDtoSchema.parse(
         convertObjectToCamelCase(movie),
       );
-      res.status(200).json(movieDto);
+      sendSuccess({
+        res,
+        message: `Movie with id ${id} retrieved successfully.`,
+        data: movieDto,
+      });
     } else {
       res.status(404).json({ error: `Movie with id ${id} not found.` });
     }
