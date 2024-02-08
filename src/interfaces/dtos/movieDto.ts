@@ -10,6 +10,9 @@ const MovieDtoSchema = z.object({
   revenue: z.string().nullable(),
   voteAverage: z.string().nullable(),
   votesCount: z.string().nullable(),
+  youtubeTrailerKey: z.string().nullable(),
+  abstract: z.string().nullable(),
+  category: z.string().nullable(),
 });
 
 type MovieDto = z.infer<typeof MovieDtoSchema>;

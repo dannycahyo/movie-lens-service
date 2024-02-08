@@ -13,23 +13,28 @@ export class MovieRepositoryImpl implements MovieRepository {
 
     try {
       const { rows: movies } = await pool.query<Movie>(
-        `
-            SELECT
-              id,
-              name,
-              date,
-              kind,
-              runtime,
-              budget,
-              revenue,
-              vote_average,
-              votes_count
-            FROM movies
-            ORDER BY ${order[0]} ${order[1]}
-            OFFSET $1
-            LIMIT $2
-          `,
-        [offset, limitValue],
+        `SELECT 
+          m.id, m.name, m.date, m.kind, m.runtime, m.budget, m.revenue, m.vote_average, m.votes_count, t.key as youtube_trailer_key, man.abstract, c.name as category
+        FROM 
+          movies m
+        LEFT JOIN 
+          trailers t 
+        ON 
+          m.id = t.movie_id
+        LEFT JOIN
+          movie_abstracts_en man
+        ON
+          m.id = man.movie_id
+        LEFT JOIN
+          categories c
+        ON
+          m.parent_id = c.parent_id
+        WHERE
+          t.source = 'youtube'
+        ORDER BY 
+          ${order[0]} ${order[1]}
+        LIMIT $1 OFFSET $2`,
+        [limitValue, offset],
       );
 
       return movies;
