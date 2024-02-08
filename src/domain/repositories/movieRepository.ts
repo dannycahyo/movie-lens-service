@@ -3,4 +3,5 @@ import type { MovieRequestParams } from "../../interfaces/controllers/types/movi
 
 export interface MovieRepository {
   getMovies(moviePrams: MovieRequestParams): Promise<Movie[]>;
+  getMovieById(id: string): Promise<Movie | null>;
 }

@@ -8,4 +8,8 @@ export class MovieUseCases {
   async getMovies(movieParams: MovieRequestParams): Promise<Movie[]> {
     return await this.movieRepository.getMovies(movieParams);
   }
+
+  async getMovieById(id: string): Promise<Movie | null> {
+    return await this.movieRepository.getMovieById(id);
+  }
 }

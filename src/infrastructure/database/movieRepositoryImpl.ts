@@ -43,4 +43,38 @@ export class MovieRepositoryImpl implements MovieRepository {
       throw error;
     }
   }
+
+  async getMovieById(id: string): Promise<Movie | null> {
+    try {
+      const { rows: movies } = await pool.query<Movie>(
+        `SELECT 
+          m.id, m.name, m.date, m.kind, m.runtime, m.budget, m.revenue, m.vote_average, m.votes_count, t.key as youtube_trailer_key, man.abstract, c.name as category
+        FROM
+          movies m
+        LEFT JOIN
+          trailers t
+        ON
+          m.id = t.movie_id
+        LEFT JOIN
+          movie_abstracts_en man
+        ON
+          m.id = man.movie_id
+        LEFT JOIN
+          categories c
+        ON
+          m.parent_id = c.parent_id
+        WHERE
+          m.id = $1
+        AND
+          t.source = 'youtube'
+        `,
+        [id],
+      );
+
+      return movies[0] ?? null;
+    } catch (error) {
+      console.error(`Error on MovieRepositoryImpl.getMovieById(): ${error}`);
+      throw error;
+    }
+  }
 }
