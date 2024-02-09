@@ -1,4 +1,7 @@
-import type { Movie } from "../../domain/entities/movieEntity";
+import type {
+  Movie,
+  MovieWithMostKeyword,
+} from "../../domain/entities/movieEntity";
 import type { PersonWithRevenue } from "../../domain/entities/personEntity";
 import type { MovieRepository } from "../../domain/repositories/movieRepository";
 import type { MovieRequestParams } from "../../interfaces/controllers/types/movieRequestParams";
@@ -19,5 +22,11 @@ export class MovieUseCases {
     personParams: PaginationRequestParams,
   ): Promise<PersonWithRevenue[]> {
     return await this.movieRepository.getTopPeopleWithMostRevenue(personParams);
+  }
+
+  async getTopMoviesWithTheMostKeyword(
+    params: PaginationRequestParams,
+  ): Promise<MovieWithMostKeyword[]> {
+    return await this.movieRepository.getTopMoviesWithTheMostKeyword(params);
   }
 }

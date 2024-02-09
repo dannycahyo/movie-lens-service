@@ -1,6 +1,9 @@
 import { pool } from "../../config/dbConnection";
 
-import type { Movie } from "../../domain/entities/movieEntity";
+import type {
+  Movie,
+  MovieWithMostKeyword,
+} from "../../domain/entities/movieEntity";
 import type { PersonWithRevenue } from "../../domain/entities/personEntity";
 import type { MovieRepository } from "../../domain/repositories/movieRepository";
 import type { MovieRequestParams } from "../../interfaces/controllers/types/movieRequestParams";
@@ -115,6 +118,46 @@ export class MovieRepositoryImpl implements MovieRepository {
     } catch (error) {
       console.error(
         `Error on MovieRepositoryImpl.getTopPeopleWithMostRevenue(): ${error}`,
+      );
+      throw error;
+    }
+  }
+
+  async getTopMoviesWithTheMostKeyword(
+    paginationParams: PaginationRequestParams,
+  ): Promise<MovieWithMostKeyword[]> {
+    const { page, limit } = paginationParams;
+    const limitValue = limit ?? 20;
+    const offset = page ? (Number(page) - 1) * Number(limitValue) : 0;
+
+    try {
+      const { rows: movies } = await pool.query<MovieWithMostKeyword>(
+        `
+        SELECT 
+          m.id, m.name, m.date, m.kind, m.runtime, m.budget, m.revenue, m.vote_average, m.votes_count, c.name as category, COUNT(c.id) as total_keyword
+        FROM
+          movies m
+        INNER JOIN
+          movie_keywords mk
+        ON
+          m.id = mk.movie_id
+        INNER JOIN
+          categories c
+        ON
+          mk.category_id = c.id
+        GROUP BY
+          m.id, m.name, c.name 
+        ORDER BY
+          total_keyword DESC
+        LIMIT $1 OFFSET $2;
+        `,
+        [limitValue, offset],
+      );
+
+      return movies;
+    } catch (error) {
+      console.error(
+        `Error on MovieRepositoryImpl.getTopMoviesWithTheMostKeyword(): ${error}`,
       );
       throw error;
     }

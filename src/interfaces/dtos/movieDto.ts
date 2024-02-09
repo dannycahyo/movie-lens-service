@@ -15,6 +15,12 @@ const MovieDtoSchema = z.object({
   category: z.string().nullable(),
 });
 
-type MovieDto = z.infer<typeof MovieDtoSchema>;
+const MovieWithMostKeywordDtoSchema = MovieDtoSchema.extend({
+  totalKeyword: z.string(),
+}).omit({ youtubeTrailerKey: true, abstract: true });
 
-export { MovieDtoSchema, type MovieDto };
+type MovieDto = z.infer<typeof MovieDtoSchema>;
+type MovieWithMostKeywordDto = z.infer<typeof MovieWithMostKeywordDtoSchema>;
+
+export { MovieDtoSchema, MovieWithMostKeywordDtoSchema };
+export type { MovieDto, MovieWithMostKeywordDto };

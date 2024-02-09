@@ -1,5 +1,8 @@
 import { MovieUseCases } from "../../application/usecases/movieUseCases";
-import { MovieDtoSchema } from "../dtos/movieDto";
+import {
+  MovieDtoSchema,
+  MovieWithMostKeywordDtoSchema,
+} from "../dtos/movieDto";
 import { PersonWithRevenueDTOSchema } from "../dtos/personDto";
 import { MovieRequestParamsSchema } from "./types/movieRequestParams";
 import { PaginationRequestParamsSchema } from "./types/paginationParams";
@@ -7,7 +10,7 @@ import { MovieRepositoryImpl } from "../../infrastructure/database/movieReposito
 import { convertObjectToCamelCase } from "../../utils/convertObjectToCamelCase";
 import { sendSuccess, sendError } from "../../utils/sendResponses";
 
-import type { MovieDto } from "../dtos/movieDto";
+import type { MovieDto, MovieWithMostKeywordDto } from "../dtos/movieDto";
 import type { PersonWithRevenueDTO } from "../dtos/personDto";
 import type { MovieRequestParams } from "./types/movieRequestParams";
 import type { PaginationRequestParams } from "./types/paginationParams";
@@ -91,6 +94,35 @@ export const getTopPeopleWithMostRevenue = async (
     sendError({
       res,
       message: "Error on movieController.getTopPeopleWithMostRevenue()",
+      error,
+    });
+  }
+};
+
+export const getTopMoviesWithTheMostKeyword = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const paginationParams: PaginationRequestParams =
+      PaginationRequestParamsSchema.parse(req.query);
+
+    const moviesWithMostKeyword =
+      await movieUseCases.getTopMoviesWithTheMostKeyword(paginationParams);
+    const moviesWithMostKeywordDto: MovieWithMostKeywordDto[] =
+      moviesWithMostKeyword.map((movie) =>
+        MovieWithMostKeywordDtoSchema.parse(convertObjectToCamelCase(movie)),
+      );
+
+    sendSuccess({
+      res,
+      message: "Movies with most keyword retrieved successfully.",
+      data: moviesWithMostKeywordDto,
+    });
+  } catch (error) {
+    sendError({
+      res,
+      message: "Error on movieController.getTopMoviesWithTheMostKeyword()",
       error,
     });
   }
