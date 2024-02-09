@@ -1,8 +1,7 @@
 import { z } from "zod";
+import { PaginationRequestParamsSchema } from "./paginationParams";
 
-const MovieRequestParamsSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().positive().optional(),
+const MovieRequestParamsSchema = PaginationRequestParamsSchema.extend({
   sort: z.string().optional(),
 });
 

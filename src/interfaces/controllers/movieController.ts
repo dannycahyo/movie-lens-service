@@ -1,13 +1,16 @@
-import { z } from "zod";
 import { MovieUseCases } from "../../application/usecases/movieUseCases";
 import { MovieDtoSchema } from "../dtos/movieDto";
+import { PersonWithRevenueDTOSchema } from "../dtos/personDto";
 import { MovieRequestParamsSchema } from "./types/movieRequestParams";
+import { PaginationRequestParamsSchema } from "./types/paginationParams";
 import { MovieRepositoryImpl } from "../../infrastructure/database/movieRepositoryImpl";
 import { convertObjectToCamelCase } from "../../utils/convertObjectToCamelCase";
-import { sendSuccess } from "../../utils/sendResponses";
+import { sendSuccess, sendError } from "../../utils/sendResponses";
 
 import type { MovieDto } from "../dtos/movieDto";
+import type { PersonWithRevenueDTO } from "../dtos/personDto";
 import type { MovieRequestParams } from "./types/movieRequestParams";
+import type { PaginationRequestParams } from "./types/paginationParams";
 import type { Request, Response } from "express";
 
 const movieRepository = new MovieRepositoryImpl();
@@ -30,14 +33,7 @@ export const getMovies = async (req: Request, res: Response): Promise<void> => {
       data: moviesDto,
     });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ error: "Bad Request", details: error.errors });
-      return;
-    } else {
-      console.error(`Error on movieController.getMovies(): ${error}`);
-      res.status(500).json({ error: "Internal Server Error", details: error });
-      return;
-    }
+    sendError({ res, message: "Error on movieController.getMovies()", error });
   }
 };
 
@@ -62,13 +58,40 @@ export const getMovieById = async (
       res.status(404).json({ error: `Movie with id ${id} not found.` });
     }
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ error: "Bad Request", details: error.errors });
-      return;
-    } else {
-      console.error(`Error on movieController.getMovieById(): ${error}`);
-      res.status(500).json({ error: "Internal Server Error", details: error });
-      return;
-    }
+    sendError({
+      res,
+      message: "Error on movieController.getMovieById()",
+      error,
+    });
+  }
+};
+
+export const getTopPeopleWithMostRevenue = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const personReqParams: PaginationRequestParams =
+      PaginationRequestParamsSchema.parse(req.query);
+
+    const peopleWithRevenue = await movieUseCases.getTopPeopleWithMostRevenue(
+      personReqParams,
+    );
+    const peopleWithRevenueDto: PersonWithRevenueDTO[] = peopleWithRevenue.map(
+      (person) =>
+        PersonWithRevenueDTOSchema.parse(convertObjectToCamelCase(person)),
+    );
+
+    sendSuccess({
+      res,
+      message: "People with most revenue retrieved successfully.",
+      data: peopleWithRevenueDto,
+    });
+  } catch (error) {
+    sendError({
+      res,
+      message: "Error on movieController.getTopPeopleWithMostRevenue()",
+      error,
+    });
   }
 };
