@@ -141,6 +141,10 @@ export const getMovieCastAndCrew = async (
     const { id } = req.params;
 
     const castAndCrew = await movieUseCases.getMovieCastAndCrew(id);
+    if (castAndCrew.length === 0) {
+      res.status(404).json({ error: `Movie with id ${id} not found.` });
+    }
+
     const castAndCrewDto: MovieCastAndCrewDto[] = castAndCrew.map((person) =>
       MovieCastAndCrewDtoSchema.parse({
         ...person,
