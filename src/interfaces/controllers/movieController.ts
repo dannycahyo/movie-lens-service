@@ -24,145 +24,158 @@ import type { Request, Response } from "express";
 const movieRepository = new MovieRepositoryImpl();
 const movieUseCases = new MovieUseCases(movieRepository);
 
-export const getMovies = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const movieReqParams: MovieRequestParams = MovieRequestParamsSchema.parse(
-      req.query,
-    );
+class MovieController {
+  private movieRepository: MovieRepositoryImpl;
+  private movieUseCases: MovieUseCases;
 
-    const movies = await movieUseCases.getMovies(movieReqParams);
-    const moviesDto: MovieDto[] = movies.map((movie) =>
-      MovieDtoSchema.parse(convertObjectToCamelCase(movie)),
-    );
-
-    sendSuccess({
-      res,
-      message: "Movies retrieved successfully.",
-      data: moviesDto,
-    });
-  } catch (error) {
-    sendError({ res, message: "Error on movieController.getMovies()", error });
+  constructor() {
+    this.movieRepository = new MovieRepositoryImpl();
+    this.movieUseCases = new MovieUseCases(this.movieRepository);
   }
-};
 
-export const getMovieById = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const movie = await movieUseCases.getMovieById(id);
-
-    if (movie !== null) {
-      const movieDto: MovieDto = MovieDtoSchema.parse(
-        convertObjectToCamelCase(movie),
+  public getMovies = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const movieReqParams: MovieRequestParams = MovieRequestParamsSchema.parse(
+        req.query,
       );
+
+      const movies = await movieUseCases.getMovies(movieReqParams);
+      const moviesDto: MovieDto[] = movies.map((movie) =>
+        MovieDtoSchema.parse(convertObjectToCamelCase(movie)),
+      );
+
       sendSuccess({
         res,
-        message: `Movie with id ${id} retrieved successfully.`,
-        data: movieDto,
+        message: "Movies retrieved successfully.",
+        data: moviesDto,
       });
-    } else {
-      res.status(404).json({ error: `Movie with id ${id} not found.` });
+    } catch (error) {
+      sendError({
+        res,
+        message: "Error on movieController.getMovies()",
+        error,
+      });
     }
-  } catch (error) {
-    sendError({
-      res,
-      message: "Error on movieController.getMovieById()",
-      error,
-    });
-  }
-};
+  };
 
-export const getTopPeopleWithMostRevenue = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const personReqParams: PaginationRequestParams =
-      PaginationRequestParamsSchema.parse(req.query);
+  public getMovieById = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const movie = await movieUseCases.getMovieById(id);
 
-    const peopleWithRevenue = await movieUseCases.getTopPeopleWithMostRevenue(
-      personReqParams,
-    );
-    const peopleWithRevenueDto: PersonWithRevenueDTO[] = peopleWithRevenue.map(
-      (person) =>
-        PersonWithRevenueDTOSchema.parse(convertObjectToCamelCase(person)),
-    );
+      if (movie !== null) {
+        const movieDto: MovieDto = MovieDtoSchema.parse(
+          convertObjectToCamelCase(movie),
+        );
+        sendSuccess({
+          res,
+          message: `Movie with id ${id} retrieved successfully.`,
+          data: movieDto,
+        });
+      } else {
+        res.status(404).json({ error: `Movie with id ${id} not found.` });
+      }
+    } catch (error) {
+      sendError({
+        res,
+        message: "Error on movieController.getMovieById()",
+        error,
+      });
+    }
+  };
 
-    sendSuccess({
-      res,
-      message: "People with most revenue retrieved successfully.",
-      data: peopleWithRevenueDto,
-    });
-  } catch (error) {
-    sendError({
-      res,
-      message: "Error on movieController.getTopPeopleWithMostRevenue()",
-      error,
-    });
-  }
-};
+  public getTopPeopleWithMostRevenue = async (
+    req: Request,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const personReqParams: PaginationRequestParams =
+        PaginationRequestParamsSchema.parse(req.query);
 
-export const getTopMoviesWithTheMostKeyword = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const paginationParams: PaginationRequestParams =
-      PaginationRequestParamsSchema.parse(req.query);
+      const peopleWithRevenue = await movieUseCases.getTopPeopleWithMostRevenue(
+        personReqParams,
+      );
+      const peopleWithRevenueDto: PersonWithRevenueDTO[] =
+        peopleWithRevenue.map((person) =>
+          PersonWithRevenueDTOSchema.parse(convertObjectToCamelCase(person)),
+        );
 
-    const moviesWithMostKeyword =
-      await movieUseCases.getTopMoviesWithTheMostKeyword(paginationParams);
-    const moviesWithMostKeywordDto: MovieWithMostKeywordDto[] =
-      moviesWithMostKeyword.map((movie) =>
-        MovieWithMostKeywordDtoSchema.parse(convertObjectToCamelCase(movie)),
+      sendSuccess({
+        res,
+        message: "People with most revenue retrieved successfully.",
+        data: peopleWithRevenueDto,
+      });
+    } catch (error) {
+      sendError({
+        res,
+        message: "Error on movieController.getTopPeopleWithMostRevenue()",
+        error,
+      });
+    }
+  };
+
+  public getTopMoviesWithTheMostKeyword = async (
+    req: Request,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const paginationParams: PaginationRequestParams =
+        PaginationRequestParamsSchema.parse(req.query);
+
+      const moviesWithMostKeyword =
+        await movieUseCases.getTopMoviesWithTheMostKeyword(paginationParams);
+      const moviesWithMostKeywordDto: MovieWithMostKeywordDto[] =
+        moviesWithMostKeyword.map((movie) =>
+          MovieWithMostKeywordDtoSchema.parse(convertObjectToCamelCase(movie)),
+        );
+
+      sendSuccess({
+        res,
+        message: "Movies with most keyword retrieved successfully.",
+        data: moviesWithMostKeywordDto,
+      });
+    } catch (error) {
+      sendError({
+        res,
+        message: "Error on movieController.getTopMoviesWithTheMostKeyword()",
+        error,
+      });
+    }
+  };
+
+  public getMovieCastAndCrew = async (
+    req: Request,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const castAndCrew = await movieUseCases.getMovieCastAndCrew(id);
+      if (castAndCrew.length === 0) {
+        res.status(404).json({ error: `Movie with id ${id} not found.` });
+      }
+
+      const castAndCrewDto: MovieCastAndCrewDto[] = castAndCrew.map((person) =>
+        MovieCastAndCrewDtoSchema.parse({
+          ...person,
+          personName: person.name,
+          jobName: person.job,
+        }),
       );
 
-    sendSuccess({
-      res,
-      message: "Movies with most keyword retrieved successfully.",
-      data: moviesWithMostKeywordDto,
-    });
-  } catch (error) {
-    sendError({
-      res,
-      message: "Error on movieController.getTopMoviesWithTheMostKeyword()",
-      error,
-    });
-  }
-};
-
-export const getMovieCastAndCrew = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const { id } = req.params;
-
-    const castAndCrew = await movieUseCases.getMovieCastAndCrew(id);
-    if (castAndCrew.length === 0) {
-      res.status(404).json({ error: `Movie with id ${id} not found.` });
+      sendSuccess({
+        res,
+        message: `Cast and crew for movie with id ${id} retrieved successfully.`,
+        data: castAndCrewDto,
+      });
+    } catch (error) {
+      sendError({
+        res,
+        message: "Error on movieController.getMovieCastAndCrew()",
+        error,
+      });
     }
+  };
+}
 
-    const castAndCrewDto: MovieCastAndCrewDto[] = castAndCrew.map((person) =>
-      MovieCastAndCrewDtoSchema.parse({
-        ...person,
-        personName: person.name,
-        jobName: person.job,
-      }),
-    );
-
-    sendSuccess({
-      res,
-      message: `Cast and crew for movie with id ${id} retrieved successfully.`,
-      data: castAndCrewDto,
-    });
-  } catch (error) {
-    sendError({
-      res,
-      message: "Error on movieController.getMovieCastAndCrew()",
-      error,
-    });
-  }
-};
+export const movieController = new MovieController();
