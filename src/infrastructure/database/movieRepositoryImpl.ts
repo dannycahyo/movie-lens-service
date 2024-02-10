@@ -3,6 +3,7 @@ import { pool } from "../../config/dbConnection";
 import type {
   Movie,
   MovieWithMostKeyword,
+  MovieCastAndCrew,
 } from "../../domain/entities/movieEntity";
 import type { PersonWithRevenue } from "../../domain/entities/personEntity";
 import type { MovieRepository } from "../../domain/repositories/movieRepository";
@@ -158,6 +159,37 @@ export class MovieRepositoryImpl implements MovieRepository {
     } catch (error) {
       console.error(
         `Error on MovieRepositoryImpl.getTopMoviesWithTheMostKeyword(): ${error}`,
+      );
+      throw error;
+    }
+  }
+
+  async getMovieCastAndCrew(id: string): Promise<MovieCastAndCrew[]> {
+    try {
+      const { rows: castAndCrew } = await pool.query<MovieCastAndCrew>(
+        `
+        SELECT 
+          p.id, p.name, c.role, j.name as job
+        FROM
+          people p
+        INNER JOIN
+          casts c
+        ON
+          p.id = c.person_id
+        INNER JOIN
+          jobs j
+        ON
+          c.job_id = j.id
+        WHERE
+          c.movie_id = $1;
+        `,
+        [id],
+      );
+
+      return castAndCrew;
+    } catch (error) {
+      console.error(
+        `Error on MovieRepositoryImpl.getMovieCastAndCrew(): ${error}`,
       );
       throw error;
     }

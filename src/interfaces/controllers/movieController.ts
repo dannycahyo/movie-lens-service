@@ -2,6 +2,7 @@ import { MovieUseCases } from "../../application/usecases/movieUseCases";
 import {
   MovieDtoSchema,
   MovieWithMostKeywordDtoSchema,
+  MovieCastAndCrewDtoSchema,
 } from "../dtos/movieDto";
 import { PersonWithRevenueDTOSchema } from "../dtos/personDto";
 import { MovieRequestParamsSchema } from "./types/movieRequestParams";
@@ -10,7 +11,11 @@ import { MovieRepositoryImpl } from "../../infrastructure/database/movieReposito
 import { convertObjectToCamelCase } from "../../utils/convertObjectToCamelCase";
 import { sendSuccess, sendError } from "../../utils/sendResponses";
 
-import type { MovieDto, MovieWithMostKeywordDto } from "../dtos/movieDto";
+import type {
+  MovieDto,
+  MovieWithMostKeywordDto,
+  MovieCastAndCrewDto,
+} from "../dtos/movieDto";
 import type { PersonWithRevenueDTO } from "../dtos/personDto";
 import type { MovieRequestParams } from "./types/movieRequestParams";
 import type { PaginationRequestParams } from "./types/paginationParams";
@@ -123,6 +128,36 @@ export const getTopMoviesWithTheMostKeyword = async (
     sendError({
       res,
       message: "Error on movieController.getTopMoviesWithTheMostKeyword()",
+      error,
+    });
+  }
+};
+
+export const getMovieCastAndCrew = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const castAndCrew = await movieUseCases.getMovieCastAndCrew(id);
+    const castAndCrewDto: MovieCastAndCrewDto[] = castAndCrew.map((person) =>
+      MovieCastAndCrewDtoSchema.parse({
+        ...person,
+        personName: person.name,
+        jobName: person.job,
+      }),
+    );
+
+    sendSuccess({
+      res,
+      message: `Cast and crew for movie with id ${id} retrieved successfully.`,
+      data: castAndCrewDto,
+    });
+  } catch (error) {
+    sendError({
+      res,
+      message: "Error on movieController.getMovieCastAndCrew()",
       error,
     });
   }

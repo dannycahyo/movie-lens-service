@@ -8,6 +8,7 @@ router.get(
   movieController.getTopMoviesWithTheMostKeyword,
 );
 router.get("/movies", movieController.getMovies);
+router.get("/movies/:id/cast-crew", movieController.getMovieCastAndCrew);
 router.get("/movies/:id", movieController.getMovieById);
 router.get("/people/top-revenue", movieController.getTopPeopleWithMostRevenue);
 

@@ -19,8 +19,16 @@ const MovieWithMostKeywordSchema = MovieSchema.extend({
   total_keyword: z.string(),
 }).omit({ youtube_trailer_key: true, abstract: true });
 
+const MovieCastAndCrewSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  role: z.string(),
+  job: z.string(),
+});
+
 type Movie = z.infer<typeof MovieSchema>;
 type MovieWithMostKeyword = z.infer<typeof MovieWithMostKeywordSchema>;
+type MovieCastAndCrew = z.infer<typeof MovieCastAndCrewSchema>;
 
-export { MovieSchema, MovieWithMostKeywordSchema };
-export type { Movie, MovieWithMostKeyword };
+export { MovieSchema, MovieWithMostKeywordSchema, MovieCastAndCrewSchema };
+export type { Movie, MovieWithMostKeyword, MovieCastAndCrew };
