@@ -21,10 +21,7 @@ import type { MovieRequestParams } from "./types/movieRequestParams";
 import type { PaginationRequestParams } from "./types/paginationParams";
 import type { Request, Response } from "express";
 
-const movieRepository = new MovieRepositoryImpl();
-const movieUseCases = new MovieUseCases(movieRepository);
-
-class MovieController {
+export class MovieController {
   private movieRepository: MovieRepositoryImpl;
   private movieUseCases: MovieUseCases;
 
@@ -39,7 +36,7 @@ class MovieController {
         req.query,
       );
 
-      const movies = await movieUseCases.getMovies(movieReqParams);
+      const movies = await this.movieUseCases.getMovies(movieReqParams);
       const moviesDto: MovieDto[] = movies.map((movie) =>
         MovieDtoSchema.parse(convertObjectToCamelCase(movie)),
       );
@@ -61,7 +58,7 @@ class MovieController {
   public getMovieById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const movie = await movieUseCases.getMovieById(id);
+      const movie = await this.movieUseCases.getMovieById(id);
 
       if (movie !== null) {
         const movieDto: MovieDto = MovieDtoSchema.parse(
@@ -92,9 +89,8 @@ class MovieController {
       const personReqParams: PaginationRequestParams =
         PaginationRequestParamsSchema.parse(req.query);
 
-      const peopleWithRevenue = await movieUseCases.getTopPeopleWithMostRevenue(
-        personReqParams,
-      );
+      const peopleWithRevenue =
+        await this.movieUseCases.getTopPeopleWithMostRevenue(personReqParams);
       const peopleWithRevenueDto: PersonWithRevenueDTO[] =
         peopleWithRevenue.map((person) =>
           PersonWithRevenueDTOSchema.parse(convertObjectToCamelCase(person)),
@@ -123,7 +119,9 @@ class MovieController {
         PaginationRequestParamsSchema.parse(req.query);
 
       const moviesWithMostKeyword =
-        await movieUseCases.getTopMoviesWithTheMostKeyword(paginationParams);
+        await this.movieUseCases.getTopMoviesWithTheMostKeyword(
+          paginationParams,
+        );
       const moviesWithMostKeywordDto: MovieWithMostKeywordDto[] =
         moviesWithMostKeyword.map((movie) =>
           MovieWithMostKeywordDtoSchema.parse(convertObjectToCamelCase(movie)),
@@ -150,7 +148,7 @@ class MovieController {
     try {
       const { id } = req.params;
 
-      const castAndCrew = await movieUseCases.getMovieCastAndCrew(id);
+      const castAndCrew = await this.movieUseCases.getMovieCastAndCrew(id);
       if (castAndCrew.length === 0) {
         res.status(404).json({ error: `Movie with id ${id} not found.` });
       }
@@ -177,5 +175,3 @@ class MovieController {
     }
   };
 }
-
-export const movieController = new MovieController();

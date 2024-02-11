@@ -1,6 +1,7 @@
 import express from "express";
-import { movieController } from "../interfaces/controllers/movieController";
+import { MovieController } from "../interfaces/controllers/movieController";
 
+const movieController = new MovieController();
 const router = express.Router();
 
 router.get(
