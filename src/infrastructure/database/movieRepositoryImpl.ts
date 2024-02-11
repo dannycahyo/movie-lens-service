@@ -4,11 +4,23 @@ import type {
   Movie,
   MovieWithMostKeyword,
   MovieCastAndCrew,
+  MainMovieTable,
+  MovieAbstractEN,
+  Country,
+  Category,
+  Keyword,
+  Cast,
+  Language,
+  Trailer,
+  Link,
+  CreateMovie,
+  Abstract,
 } from "../../domain/entities/movieEntity";
 import type { PersonWithRevenue } from "../../domain/entities/personEntity";
 import type { MovieRepository } from "../../domain/repositories/movieRepository";
 import type { MovieRequestParams } from "../../interfaces/controllers/types/movieRequestParams";
 import type { PaginationRequestParams } from "../../interfaces/controllers/types/paginationParams";
+import type { CreateMovieDto } from "../../interfaces/dtos/movieDto";
 
 export class MovieRepositoryImpl implements MovieRepository {
   async getMovies(movieReqParams: MovieRequestParams): Promise<Movie[]> {
@@ -191,6 +203,217 @@ export class MovieRepositoryImpl implements MovieRepository {
       console.error(
         `Error on MovieRepositoryImpl.getMovieCastAndCrew(): ${error}`,
       );
+      throw error;
+    }
+  }
+
+  async createMovie(movie: CreateMovieDto): Promise<CreateMovie> {
+    try {
+      const {
+        id: movieId,
+        countries,
+        abstracts,
+        categories,
+        keywords,
+        budget,
+        casts,
+        date,
+        homePage,
+        kind,
+        languages,
+        links,
+        name,
+        parentId,
+        revenue,
+        runtime,
+        seriesId,
+        trailers,
+        voteAverage,
+        votesCount,
+      } = movie;
+      await pool.query("BEGIN");
+      const insertMovieQuery = `
+        INSERT INTO
+          movies (id, name, parent_id, date, series_id, kind, runtime, budget, revenue, homepage, vote_average, votes_count)
+        VALUES
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        RETURNING *;
+      `;
+      const { rows: createdMovie } = await pool.query<MainMovieTable>(
+        insertMovieQuery,
+        [
+          movieId,
+          name,
+          parentId,
+          date,
+          seriesId,
+          kind,
+          runtime,
+          budget,
+          revenue,
+          homePage,
+          voteAverage,
+          votesCount,
+        ],
+      );
+
+      const insertMovieAbstractQuery = `
+        INSERT INTO
+          movie_abstracts_en (movie_id, abstract)
+        VALUES
+          ($1, $2)
+        RETURNING abstract;
+      `;
+
+      const { rows: createdMovieAbstractEN } = await pool.query<Abstract>(
+        insertMovieAbstractQuery,
+        [movieId, abstracts.en],
+      );
+
+      const insertMovieCountryQuery = `
+        INSERT INTO
+          movie_countries (movie_id, country)
+        VALUES
+          ($1, $2)
+        RETURNING country;
+      `;
+
+      const createdCountries: Country[] = [];
+
+      for (const country of countries) {
+        const { rows: createdCountry } = await pool.query<Country>(
+          insertMovieCountryQuery,
+          [movieId, country.country],
+        );
+        createdCountries.push(createdCountry[0]);
+      }
+
+      const insertMovieCategoryQuery = `
+        INSERT INTO
+          movie_categories (movie_id, category_id)
+        VALUES
+          ($1, $2)
+        RETURNING category_id;
+      `;
+
+      const createdCategories: Category[] = [];
+
+      for (const category of categories) {
+        const { rows: createdCategory } = await pool.query(
+          insertMovieCategoryQuery,
+          [movieId, category.categoryId],
+        );
+        createdCategories.push(createdCategory[0]);
+      }
+
+      const insertMovieKeywordQuery = `
+        INSERT INTO
+          movie_keywords (movie_id, category_id)
+        VALUES
+          ($1, $2)
+        RETURNING category_id;
+      `;
+
+      const createdKeywords: Keyword[] = [];
+
+      for (const keyword of keywords) {
+        const { rows: createdKeyword } = await pool.query(
+          insertMovieKeywordQuery,
+          [movieId, keyword.categoryId],
+        );
+        createdKeywords.push(createdKeyword[0]);
+      }
+
+      const insertMovieCastQuery = `
+        INSERT INTO
+          movie_casts (movie_id, person_id, job_id, role, position)
+        VALUES
+          ($1, $2, $3, $4, $5)
+        RETURNING person_id, job_id, role, position;
+      `;
+
+      const createdCasts: Cast[] = [];
+
+      for (const cast of casts) {
+        const { rows: createdCast } = await pool.query<Cast>(
+          insertMovieCastQuery,
+          [movieId, cast.personId, cast.jobId, cast.role, cast.position],
+        );
+        createdCasts.push(createdCast[0]);
+      }
+
+      const insertMovieLanguageQuery = `
+        INSERT INTO
+          movie_languages (movie_id, language)
+        VALUES
+          ($1, $2)
+        RETURNING language;
+      `;
+
+      const createdLanguages: Language[] = [];
+
+      for (const language of languages) {
+        const { rows: createdLanguage } = await pool.query<Language>(
+          insertMovieLanguageQuery,
+          [movieId, language.language],
+        );
+        createdLanguages.push(createdLanguage[0]);
+      }
+
+      const insertMovieTrailerQuery = `
+        INSERT INTO
+          trailers (movie_id, key, language, source)
+        VALUES
+          ($1, $2, $3, $4)
+        RETURNING trailer_id, key, language, source;
+      `;
+
+      const createdTrailers: Trailer[] = [];
+
+      for (const trailer of trailers) {
+        const { rows: createdTrailer } = await pool.query<Trailer>(
+          insertMovieTrailerQuery,
+          [movieId, trailer.key, trailer.language, trailer.source],
+        );
+        createdTrailers.push(createdTrailer[0]);
+      }
+
+      const insertMovieLinkQuery = `
+        INSERT INTO
+          movie_links (movie_id, key, language, source)
+        VALUES
+          ($1, $2, $3, $4)
+        RETURNING key, language, source;
+      `;
+
+      const createdLinks: Link[] = [];
+
+      for (const link of links) {
+        const { rows: created } = await pool.query<Link>(insertMovieLinkQuery, [
+          movieId,
+          link.key,
+          link.language,
+          link.source,
+        ]);
+        createdLinks.push(created[0]);
+      }
+
+      await pool.query("COMMIT");
+
+      return {
+        ...createdMovie[0],
+        abstracts: createdMovieAbstractEN[0],
+        countries: createdCountries,
+        categories: createdCategories,
+        keywords: createdKeywords,
+        casts: createdCasts,
+        languages: createdLanguages,
+        trailers: createdTrailers,
+        links: createdLinks,
+      };
+    } catch (error) {
+      await pool.query("ROLLBACK");
+      console.error(`Error on MovieRepositoryImpl.createMovie(): ${error}`);
       throw error;
     }
   }
