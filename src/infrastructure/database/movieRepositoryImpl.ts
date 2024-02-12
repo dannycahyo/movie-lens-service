@@ -5,7 +5,6 @@ import type {
   MovieWithMostKeyword,
   MovieCastAndCrew,
   MainMovieTable,
-  MovieAbstractEN,
   Country,
   Category,
   Keyword,
@@ -14,7 +13,7 @@ import type {
   Trailer,
   Link,
   CreateMovie,
-  Abstract,
+  EnAbstractSchema,
 } from "../../domain/entities/movieEntity";
 import type { PersonWithRevenue } from "../../domain/entities/personEntity";
 import type { MovieRepository } from "../../domain/repositories/movieRepository";
@@ -212,13 +211,13 @@ export class MovieRepositoryImpl implements MovieRepository {
       const {
         id: movieId,
         countries,
-        abstracts,
+        enAbstract,
         categories,
         keywords,
         budget,
         casts,
         date,
-        homePage,
+        homepage,
         kind,
         languages,
         links,
@@ -251,11 +250,14 @@ export class MovieRepositoryImpl implements MovieRepository {
           runtime,
           budget,
           revenue,
-          homePage,
+          homepage,
           voteAverage,
           votesCount,
         ],
       );
+
+      createdMovie[0].id = Number(createdMovie[0].id);
+      createdMovie[0].parent_id = Number(createdMovie[0].parent_id);
 
       const insertMovieAbstractQuery = `
         INSERT INTO
@@ -265,10 +267,11 @@ export class MovieRepositoryImpl implements MovieRepository {
         RETURNING abstract;
       `;
 
-      const { rows: createdMovieAbstractEN } = await pool.query<Abstract>(
-        insertMovieAbstractQuery,
-        [movieId, abstracts.en],
-      );
+      const { rows: createdMovieAbstractEN } =
+        await pool.query<EnAbstractSchema>(insertMovieAbstractQuery, [
+          movieId,
+          enAbstract.abstract,
+        ]);
 
       const insertMovieCountryQuery = `
         INSERT INTO
@@ -303,6 +306,7 @@ export class MovieRepositoryImpl implements MovieRepository {
           insertMovieCategoryQuery,
           [movieId, category.categoryId],
         );
+        createdCategory[0].category_id = Number(createdCategory[0].category_id);
         createdCategories.push(createdCategory[0]);
       }
 
@@ -321,12 +325,13 @@ export class MovieRepositoryImpl implements MovieRepository {
           insertMovieKeywordQuery,
           [movieId, keyword.categoryId],
         );
+        createdKeyword[0].category_id = Number(createdKeyword[0].category_id);
         createdKeywords.push(createdKeyword[0]);
       }
 
       const insertMovieCastQuery = `
         INSERT INTO
-          movie_casts (movie_id, person_id, job_id, role, position)
+          casts (movie_id, person_id, job_id, role, position)
         VALUES
           ($1, $2, $3, $4, $5)
         RETURNING person_id, job_id, role, position;
@@ -339,6 +344,8 @@ export class MovieRepositoryImpl implements MovieRepository {
           insertMovieCastQuery,
           [movieId, cast.personId, cast.jobId, cast.role, cast.position],
         );
+        createdCast[0].person_id = Number(createdCast[0].person_id);
+        createdCast[0].job_id = Number(createdCast[0].job_id);
         createdCasts.push(createdCast[0]);
       }
 
@@ -362,9 +369,9 @@ export class MovieRepositoryImpl implements MovieRepository {
 
       const insertMovieTrailerQuery = `
         INSERT INTO
-          trailers (movie_id, key, language, source)
+          trailers (trailer_id,movie_id, key, language, source)
         VALUES
-          ($1, $2, $3, $4)
+          ($1, $2, $3, $4, $5)
         RETURNING trailer_id, key, language, source;
       `;
 
@@ -373,8 +380,15 @@ export class MovieRepositoryImpl implements MovieRepository {
       for (const trailer of trailers) {
         const { rows: createdTrailer } = await pool.query<Trailer>(
           insertMovieTrailerQuery,
-          [movieId, trailer.key, trailer.language, trailer.source],
+          [
+            trailer.trailerId,
+            movieId,
+            trailer.key,
+            trailer.language,
+            trailer.source,
+          ],
         );
+        createdTrailer[0].trailer_id = Number(createdTrailer[0].trailer_id);
         createdTrailers.push(createdTrailer[0]);
       }
 
@@ -402,7 +416,7 @@ export class MovieRepositoryImpl implements MovieRepository {
 
       return {
         ...createdMovie[0],
-        abstracts: createdMovieAbstractEN[0],
+        en_abstract: createdMovieAbstractEN[0],
         countries: createdCountries,
         categories: createdCategories,
         keywords: createdKeywords,

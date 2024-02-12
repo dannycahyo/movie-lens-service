@@ -8,9 +8,9 @@ const MainMovieTableDtoSchema = z.object({
   seriesId: z.number().nullable(),
   kind: z.string(),
   runtime: z.number().nullable(),
-  homePage: z.string().nullable(),
   budget: z.string().nullable(),
   revenue: z.string().nullable(),
+  homepage: z.string().nullable(),
   voteAverage: z.string().nullable(),
   votesCount: z.string().nullable(),
 });
@@ -57,13 +57,14 @@ const CastDtoSchema = z.object({
 });
 
 const TrailerDtoSchema = z.object({
+  trailerId: z.number(),
   key: z.string(),
   language: z.string(),
   source: z.string(),
 });
 
-const AbstractDtoSchema = z.object({
-  en: z.string(),
+const EnAbstractSchema = z.object({
+  abstract: z.string(),
 });
 
 const LinkDtoSchema = z.object({
@@ -83,7 +84,7 @@ const CreateMovieDtoSchema = z.object({
   categories: z.array(CategoryDtoSchema),
   casts: z.array(CastDtoSchema),
   trailers: z.array(TrailerDtoSchema),
-  abstracts: AbstractDtoSchema,
+  enAbstract: EnAbstractSchema,
   links: z.array(LinkDtoSchema),
   countries: z.array(CountryDtoSchema),
 });

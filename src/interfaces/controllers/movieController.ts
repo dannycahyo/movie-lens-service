@@ -9,7 +9,10 @@ import { PersonWithRevenueDTOSchema } from "../dtos/personDto";
 import { MovieRequestParamsSchema } from "./types/movieRequestParams";
 import { PaginationRequestParamsSchema } from "./types/paginationParams";
 import { MovieRepositoryImpl } from "../../infrastructure/database/movieRepositoryImpl";
-import { convertObjectToCamelCase } from "../../utils/convertObjectToCamelCase";
+import {
+  convertNestedObjectsToCamelCase,
+  convertObjectToCamelCase,
+} from "../../utils/convertObjectToCamelCase";
 import { sendSuccess, sendError } from "../../utils/sendResponses";
 
 import type {
@@ -179,18 +182,19 @@ export class MovieController {
 
   public createMovie = async (req: Request, res: Response): Promise<void> => {
     try {
-      const movie: CreateMovieDto = CreateMovieDtoSchema.parse(req.body);
+      const movie = CreateMovieDtoSchema.parse(req.body);
       const createdMovie = await this.movieUseCases.createMovie(movie);
-      const createdMovieDto: CreateMovieDto = CreateMovieDtoSchema.parse({
-        ...convertObjectToCamelCase(createdMovie),
-        keywords: createdMovie.keywords.map(convertObjectToCamelCase),
-        categories: createdMovie.categories.map(convertObjectToCamelCase),
-        languages: createdMovie.languages.map(convertObjectToCamelCase),
-        casts: createdMovie.casts.map(convertObjectToCamelCase),
-        trailers: createdMovie.trailers.map(convertObjectToCamelCase),
-        links: createdMovie.links.map(convertObjectToCamelCase),
-        countries: createdMovie.countries.map(convertObjectToCamelCase),
-      });
+      const createdMovieDto = CreateMovieDtoSchema.parse(
+        convertNestedObjectsToCamelCase(createdMovie, [
+          "keywords",
+          "categories",
+          "languages",
+          "casts",
+          "trailers",
+          "links",
+          "countries",
+        ]),
+      );
 
       sendSuccess({
         res,

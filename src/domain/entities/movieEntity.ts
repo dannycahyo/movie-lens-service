@@ -7,10 +7,10 @@ const MainMovieTableSchema = z.object({
   date: z.date().nullable(),
   series_id: z.number().nullable(),
   kind: z.string(),
-  homepage: z.string().nullable(),
   runtime: z.string().nullable(),
   budget: z.string().nullable(),
   revenue: z.string().nullable(),
+  homepage: z.string().nullable(),
   vote_average: z.string().nullable(),
   votes_count: z.string().nullable(),
 });
@@ -57,13 +57,14 @@ const CastSchema = z.object({
 });
 
 const TrailerSchema = z.object({
+  trailer_id: z.number(),
   key: z.string(),
   language: z.string(),
   source: z.string(),
 });
 
-const AbstractSchema = z.object({
-  en: z.string(),
+const EnAbstractSchema = z.object({
+  abstract: z.string(),
 });
 
 const MovieAbstractENSchema = z.object({
@@ -88,7 +89,7 @@ const CreateMovieSchema = z.object({
   categories: z.array(CategorySchema),
   casts: z.array(CastSchema),
   trailers: z.array(TrailerSchema),
-  abstracts: AbstractSchema,
+  en_abstract: EnAbstractSchema,
   links: z.array(LinkSchema),
   countries: z.array(CountrySchema),
 });
@@ -104,7 +105,7 @@ type Language = z.infer<typeof LanguageSchema>;
 type Category = z.infer<typeof CategorySchema>;
 type Cast = z.infer<typeof CastSchema>;
 type Trailer = z.infer<typeof TrailerSchema>;
-type Abstract = z.infer<typeof AbstractSchema>;
+type EnAbstractSchema = z.infer<typeof EnAbstractSchema>;
 type Link = z.infer<typeof LinkSchema>;
 type Country = z.infer<typeof CountrySchema>;
 
@@ -126,7 +127,7 @@ export type {
   Category,
   Cast,
   Trailer,
-  Abstract,
   Link,
   Country,
+  EnAbstractSchema,
 };
