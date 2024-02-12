@@ -1,4 +1,5 @@
 import type {
+  CreateMovie,
   Movie,
   MovieCastAndCrew,
   MovieWithMostKeyword,
@@ -6,6 +7,7 @@ import type {
 import type { MovieRequestParams } from "../../interfaces/controllers/types/movieRequestParams";
 import type { PersonWithRevenue } from "../entities/personEntity";
 import type { PaginationRequestParams } from "../../interfaces/controllers/types/paginationParams";
+import type { CreateMovieDto } from "../../interfaces/dtos/movieDto";
 
 export interface MovieRepository {
   getMovies(moviePrams: MovieRequestParams): Promise<Movie[]>;
@@ -17,4 +19,5 @@ export interface MovieRepository {
     paginationParams: PaginationRequestParams,
   ): Promise<MovieWithMostKeyword[]>;
   getMovieCastAndCrew(id: string): Promise<MovieCastAndCrew[]>;
+  createMovie(movie: CreateMovieDto): Promise<CreateMovie>;
 }

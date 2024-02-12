@@ -3,18 +3,23 @@ import {
   MovieDtoSchema,
   MovieWithMostKeywordDtoSchema,
   MovieCastAndCrewDtoSchema,
+  CreateMovieDtoSchema,
 } from "../dtos/movieDto";
 import { PersonWithRevenueDTOSchema } from "../dtos/personDto";
 import { MovieRequestParamsSchema } from "./types/movieRequestParams";
 import { PaginationRequestParamsSchema } from "./types/paginationParams";
 import { MovieRepositoryImpl } from "../../infrastructure/database/movieRepositoryImpl";
-import { convertObjectToCamelCase } from "../../utils/convertObjectToCamelCase";
+import {
+  convertNestedObjectsToCamelCase,
+  convertObjectToCamelCase,
+} from "../../utils/convertObjectToCamelCase";
 import { sendSuccess, sendError } from "../../utils/sendResponses";
 
 import type {
   MovieDto,
   MovieWithMostKeywordDto,
   MovieCastAndCrewDto,
+  CreateMovieDto,
 } from "../dtos/movieDto";
 import type { PersonWithRevenueDTO } from "../dtos/personDto";
 import type { MovieRequestParams } from "./types/movieRequestParams";
@@ -170,6 +175,36 @@ export class MovieController {
       sendError({
         res,
         message: "Error on movieController.getMovieCastAndCrew()",
+        error,
+      });
+    }
+  };
+
+  public createMovie = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const movie = CreateMovieDtoSchema.parse(req.body);
+      const createdMovie = await this.movieUseCases.createMovie(movie);
+      const createdMovieDto = CreateMovieDtoSchema.parse(
+        convertNestedObjectsToCamelCase(createdMovie, [
+          "keywords",
+          "categories",
+          "languages",
+          "casts",
+          "trailers",
+          "links",
+          "countries",
+        ]),
+      );
+
+      sendSuccess({
+        res,
+        message: "Movie created successfully.",
+        data: createdMovieDto,
+      });
+    } catch (error) {
+      sendError({
+        res,
+        message: "Error on movieController.createMovie()",
         error,
       });
     }
