@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const MainMovieTableSchema = z.object({
-  id: z.number(),
+  id: z.string().or(z.number()),
   name: z.string(),
   parent_id: z.number(),
   date: z.date().nullable(),

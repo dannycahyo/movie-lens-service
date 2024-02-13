@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const MainMovieTableDtoSchema = z.object({
-  id: z.number(),
+  id: z.string().or(z.number()),
   name: z.string(),
   parentId: z.number(),
   date: z.coerce.date().nullable(),
@@ -19,7 +19,7 @@ const MovieDtoSchema = z.object({
   ...MainMovieTableDtoSchema.omit({
     parentId: true,
     seriesId: true,
-    homePage: true,
+    homepage: true,
   }).shape,
   youtubeTrailerKey: z.string().nullable(),
   abstract: z.string().nullable(),
