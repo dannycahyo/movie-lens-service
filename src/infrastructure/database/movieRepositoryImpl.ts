@@ -431,4 +431,22 @@ export class MovieRepositoryImpl implements MovieRepository {
       throw error;
     }
   }
+
+  async deleteMovie(id: string): Promise<{ id: string }> {
+    try {
+      const { rows: deletedMovie } = await pool.query<{ id: string }>(
+        `DELETE FROM 
+          movies
+        WHERE
+          id = $1
+          RETURNING id;`,
+        [id],
+      );
+
+      return deletedMovie[0] ?? null;
+    } catch (error) {
+      console.error(`Error on MovieRepositoryImpl.deleteMovie(): ${error}`);
+      throw error;
+    }
+  }
 }

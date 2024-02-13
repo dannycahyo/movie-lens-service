@@ -8,10 +8,13 @@ router.get(
   "/movies/top-keyword",
   movieController.getTopMoviesWithTheMostKeyword,
 );
+
 router.get("/movies", movieController.getMovies);
 router.post("/movies", movieController.createMovie);
-router.get("/movies/:id/cast-crew", movieController.getMovieCastAndCrew);
 router.get("/movies/:id", movieController.getMovieById);
+router.delete("/movies/:id", movieController.deleteMovie);
+
+router.get("/movies/:id/cast-crew", movieController.getMovieCastAndCrew);
 router.get("/people/top-revenue", movieController.getTopPeopleWithMostRevenue);
 
 export default router;

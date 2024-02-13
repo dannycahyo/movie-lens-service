@@ -19,7 +19,6 @@ import type {
   MovieDto,
   MovieWithMostKeywordDto,
   MovieCastAndCrewDto,
-  CreateMovieDto,
 } from "../dtos/movieDto";
 import type { PersonWithRevenueDTO } from "../dtos/personDto";
 import type { MovieRequestParams } from "./types/movieRequestParams";
@@ -205,6 +204,29 @@ export class MovieController {
       sendError({
         res,
         message: "Error on movieController.createMovie()",
+        error,
+      });
+    }
+  };
+
+  public deleteMovie = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const deletedMovie = await this.movieUseCases.deleteMovie(id);
+
+      if (deletedMovie !== null) {
+        sendSuccess({
+          res,
+          message: `Movie with id ${id} deleted successfully.`,
+          data: deletedMovie,
+        });
+      } else {
+        res.status(404).json({ error: `Movie with id ${id} not found.` });
+      }
+    } catch (error) {
+      sendError({
+        res,
+        message: "Error on movieController.deleteMovie()",
         error,
       });
     }
