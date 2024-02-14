@@ -3,7 +3,7 @@ import {
   MovieDtoSchema,
   MovieWithMostKeywordDtoSchema,
   MovieCastAndCrewDtoSchema,
-  CreateMovieDtoSchema,
+  NewMovieDtoSchema,
 } from "../dtos/movieDto";
 import { PersonWithRevenueDTOSchema } from "../dtos/personDto";
 import { MovieRequestParamsSchema } from "./types/movieRequestParams";
@@ -181,9 +181,9 @@ export class MovieController {
 
   public createMovie = async (req: Request, res: Response): Promise<void> => {
     try {
-      const movie = CreateMovieDtoSchema.parse(req.body);
+      const movie = NewMovieDtoSchema.parse(req.body);
       const createdMovie = await this.movieUseCases.createMovie(movie);
-      const createdMovieDto = CreateMovieDtoSchema.parse(
+      const createdMovieDto = NewMovieDtoSchema.parse(
         convertNestedObjectsToCamelCase(createdMovie, [
           "keywords",
           "categories",

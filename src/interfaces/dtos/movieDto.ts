@@ -77,7 +77,7 @@ const CountryDtoSchema = z.object({
   country: z.string(),
 });
 
-const CreateMovieDtoSchema = z.object({
+const NewMovieDtoSchema = z.object({
   ...MainMovieTableDtoSchema.shape,
   keywords: z.array(KeywordDtoSchema),
   languages: z.array(LanguageDtoSchema),
@@ -92,17 +92,17 @@ const CreateMovieDtoSchema = z.object({
 type MovieDto = z.infer<typeof MovieDtoSchema>;
 type MovieWithMostKeywordDto = z.infer<typeof MovieWithMostKeywordDtoSchema>;
 type MovieCastAndCrewDto = z.infer<typeof MovieCastAndCrewDtoSchema>;
-type CreateMovieDto = z.infer<typeof CreateMovieDtoSchema>;
+type NewMovieDto = z.infer<typeof NewMovieDtoSchema>;
 
 export {
   MovieDtoSchema,
   MovieWithMostKeywordDtoSchema,
   MovieCastAndCrewDtoSchema,
-  CreateMovieDtoSchema,
+  NewMovieDtoSchema,
 };
 export type {
   MovieDto,
   MovieWithMostKeywordDto,
   MovieCastAndCrewDto,
-  CreateMovieDto,
+  NewMovieDto,
 };

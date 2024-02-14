@@ -1,5 +1,5 @@
 import type {
-  CreateMovie,
+  NewMovie,
   Movie,
   MovieCastAndCrew,
   MovieWithMostKeyword,
@@ -8,7 +8,7 @@ import type { PersonWithRevenue } from "../../domain/entities/personEntity";
 import type { MovieRepository } from "../../domain/repositories/movieRepository";
 import type { MovieRequestParams } from "../../interfaces/controllers/types/movieRequestParams";
 import type { PaginationRequestParams } from "../../interfaces/controllers/types/paginationParams";
-import type { CreateMovieDto } from "../../interfaces/dtos/movieDto";
+import type { NewMovieDto } from "../../interfaces/dtos/movieDto";
 
 export class MovieUseCases {
   constructor(private movieRepository: MovieRepository) {}
@@ -37,7 +37,7 @@ export class MovieUseCases {
     return await this.movieRepository.getMovieCastAndCrew(id);
   }
 
-  async createMovie(movie: CreateMovieDto): Promise<CreateMovie> {
+  async createMovie(movie: NewMovieDto): Promise<NewMovie> {
     return await this.movieRepository.createMovie(movie);
   }
 

@@ -82,7 +82,7 @@ const CountrySchema = z.object({
   country: z.string(),
 });
 
-const CreateMovieSchema = z.object({
+const NewMovieSchema = z.object({
   ...MainMovieTableSchema.shape,
   keywords: z.array(KeywordSchema),
   languages: z.array(LanguageSchema),
@@ -99,7 +99,7 @@ type Movie = z.infer<typeof MovieSchema>;
 type MovieWithMostKeyword = z.infer<typeof MovieWithMostKeywordSchema>;
 type MovieCastAndCrew = z.infer<typeof MovieCastAndCrewSchema>;
 type MovieAbstractEN = z.infer<typeof MovieAbstractENSchema>;
-type CreateMovie = z.infer<typeof CreateMovieSchema>;
+type NewMovie = z.infer<typeof NewMovieSchema>;
 type Keyword = z.infer<typeof KeywordSchema>;
 type Language = z.infer<typeof LanguageSchema>;
 type Category = z.infer<typeof CategorySchema>;
@@ -113,7 +113,7 @@ export {
   MovieSchema,
   MovieWithMostKeywordSchema,
   MovieCastAndCrewSchema,
-  CreateMovieSchema,
+  NewMovieSchema,
 };
 export type {
   MainMovieTable,
@@ -121,7 +121,7 @@ export type {
   MovieWithMostKeyword,
   MovieCastAndCrew,
   MovieAbstractEN,
-  CreateMovie,
+  NewMovie,
   Keyword,
   Language,
   Category,

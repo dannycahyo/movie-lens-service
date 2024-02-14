@@ -12,14 +12,14 @@ import type {
   Language,
   Trailer,
   Link,
-  CreateMovie,
+  NewMovie,
   EnAbstractSchema,
 } from "../../domain/entities/movieEntity";
 import type { PersonWithRevenue } from "../../domain/entities/personEntity";
-import type { MovieRepository } from "../../domain/repositories/movieRepository";
+import type { MovieRepository } from "../../domain/repositories/MovieRepository.1";
 import type { MovieRequestParams } from "../../interfaces/controllers/types/movieRequestParams";
 import type { PaginationRequestParams } from "../../interfaces/controllers/types/paginationParams";
-import type { CreateMovieDto } from "../../interfaces/dtos/movieDto";
+import type { NewMovieDto } from "../../interfaces/dtos/movieDto";
 
 export class MovieRepositoryImpl implements MovieRepository {
   async getMovies(movieReqParams: MovieRequestParams): Promise<Movie[]> {
@@ -206,7 +206,7 @@ export class MovieRepositoryImpl implements MovieRepository {
     }
   }
 
-  async createMovie(movie: CreateMovieDto): Promise<CreateMovie> {
+  async createMovie(movie: NewMovieDto): Promise<NewMovie> {
     try {
       const {
         id: movieId,
