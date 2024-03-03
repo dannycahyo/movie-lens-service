@@ -20,5 +20,6 @@ export interface MovieRepository {
   ): Promise<MovieWithMostKeyword[]>;
   getMovieCastAndCrew(id: string): Promise<MovieCastAndCrew[]>;
   createMovie(movie: NewMovieDto): Promise<NewMovie>;
+  updateMovie(id: string, movie: NewMovieDto): Promise<NewMovie>;
   deleteMovie(id: string): Promise<{ id: string }>;
 }

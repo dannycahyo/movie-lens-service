@@ -41,6 +41,10 @@ export class MovieUseCases {
     return await this.movieRepository.createMovie(movie);
   }
 
+  async updateMovie(id: string, movie: NewMovieDto): Promise<NewMovie> {
+    return await this.movieRepository.updateMovie(id, movie);
+  }
+
   async deleteMovie(id: string): Promise<{ id: string }> {
     return await this.movieRepository.deleteMovie(id);
   }

@@ -432,6 +432,253 @@ export class MovieRepositoryImpl implements MovieRepository {
     }
   }
 
+  async updateMovie(id: string, movie: NewMovieDto): Promise<NewMovie> {
+    try {
+      const {
+        id: movieId,
+        countries,
+        enAbstract,
+        categories,
+        keywords,
+        budget,
+        casts,
+        date,
+        homepage,
+        kind,
+        languages,
+        links,
+        name,
+        parentId,
+        revenue,
+        runtime,
+        seriesId,
+        trailers,
+        voteAverage,
+        votesCount,
+      } = movie;
+
+      await pool.query("BEGIN");
+
+      const updateMovieQuery = `
+        UPDATE
+          movies
+        SET
+          name = $1,
+          parent_id = $2,
+          date = $3,
+          series_id = $4,
+          kind = $5,
+          runtime = $6,
+          budget = $7,
+          revenue = $8,
+          homepage = $9,
+          vote_average = $10,
+          votes_count = $11
+        WHERE
+          id = $12
+        RETURNING *;
+      `;
+
+      const { rows: updatedMovie } = await pool.query<MainMovieTable>(
+        updateMovieQuery,
+        [
+          name,
+          parentId,
+          date,
+          seriesId,
+          kind,
+          runtime,
+          budget,
+          revenue,
+          homepage,
+          voteAverage,
+          votesCount,
+          movieId,
+        ],
+      );
+
+      const updateMovieAbstractQuery = `
+        UPDATE
+          movie_abstracts_en
+        SET
+          abstract = $1
+        WHERE
+          movie_id = $2
+        RETURNING abstract;
+      `;
+
+      const { rows: updatedMovieAbstractEN } =
+        await pool.query<EnAbstractSchema>(updateMovieAbstractQuery, [
+          enAbstract.abstract,
+          movieId,
+        ]);
+
+      const updatedMovieCountryQuery = `
+        UPDATE
+          movie_countries
+        SET
+          country = $1
+        WHERE
+          movie_id = $2
+        RETURNING country;
+      `;
+
+      const updatedCountries: Country[] = [];
+
+      for (const country of countries) {
+        const { rows: updatedCountry } = await pool.query<Country>(
+          updatedMovieCountryQuery,
+          [country.country, movieId],
+        );
+        updatedCountries.push(updatedCountry[0]);
+      }
+
+      const updatedMovieCategoryQuery = `
+        UPDATE
+          movie_categories
+        SET
+          category_id = $1
+        WHERE
+          movie_id = $2
+        RETURNING category_id;
+      `;
+
+      const updatedCategories: Category[] = [];
+
+      for (const category of categories) {
+        const { rows: updatedCategory } = await pool.query(
+          updatedMovieCategoryQuery,
+          [category.categoryId, movieId],
+        );
+        updatedCategories.push(updatedCategory[0]);
+      }
+
+      const updatedMovieKeywordQuery = `
+        UPDATE
+          movie_keywords
+        SET
+          category_id = $1
+        WHERE
+          movie_id = $2
+        RETURNING category_id;
+      `;
+
+      const updatedKeywords: Keyword[] = [];
+
+      for (const keyword of keywords) {
+        const { rows: updatedKeyword } = await pool.query(
+          updatedMovieKeywordQuery,
+          [keyword.categoryId, movieId],
+        );
+        updatedKeywords.push(updatedKeyword[0]);
+      }
+
+      const updatedMovieCastQuery = `
+        UPDATE
+          casts
+        SET
+          person_id = $1,
+          job_id = $2,
+          role = $3,
+          position = $4
+        WHERE
+          movie_id = $5
+        RETURNING person_id, job_id, role, position;
+      `;
+
+      const updatedCasts: Cast[] = [];
+
+      for (const cast of casts) {
+        const { rows: updatedCast } = await pool.query<Cast>(
+          updatedMovieCastQuery,
+          [cast.personId, cast.jobId, cast.role, cast.position, movieId],
+        );
+        updatedCasts.push(updatedCast[0]);
+      }
+
+      const updatedMovieLanguageQuery = `
+        UPDATE
+          movie_languages
+        SET
+          language = $1
+        WHERE
+          movie_id = $2
+        RETURNING language;
+      `;
+
+      const updatedLanguages: Language[] = [];
+
+      for (const language of languages) {
+        const { rows: updatedLanguage } = await pool.query<Language>(
+          updatedMovieLanguageQuery,
+          [language.language, movieId],
+        );
+        updatedLanguages.push(updatedLanguage[0]);
+      }
+
+      const updatedMovieTrailerQuery = `
+        UPDATE
+          trailers
+        SET
+          key = $1,
+          language = $2,
+          source = $3
+        WHERE
+          movie_id = $4
+        RETURNING trailer_id, key, language, source;
+      `;
+
+      const updatedTrailers: Trailer[] = [];
+
+      for (const trailer of trailers) {
+        const { rows: updatedTrailer } = await pool.query<Trailer>(
+          updatedMovieTrailerQuery,
+          [trailer.key, trailer.language, trailer.source, movieId],
+        );
+        updatedTrailers.push(updatedTrailer[0]);
+      }
+
+      const updatedMovieLinkQuery = `
+        UPDATE
+          movie_links
+        SET
+          key = $1,
+          language = $2,
+          source = $3
+        WHERE
+          movie_id = $4
+        RETURNING key, language, source;
+      `;
+
+      const updatedLinks: Link[] = [];
+
+      for (const link of links) {
+        const { rows: updated } = await pool.query<Link>(
+          updatedMovieLinkQuery,
+          [link.key, link.language, link.source, movieId],
+        );
+        updatedLinks.push(updated[0]);
+      }
+
+      await pool.query("COMMIT");
+
+      return {
+        ...updatedMovie[0],
+        en_abstract: updatedMovieAbstractEN[0],
+        countries: updatedCountries,
+        categories: updatedCategories,
+        keywords: updatedKeywords,
+        casts: updatedCasts,
+        languages: updatedLanguages,
+        trailers: updatedTrailers,
+        links: updatedLinks,
+      };
+    } catch (error) {
+      console.error(`Error on MovieRepositoryImpl.updateMovie(): ${error}`);
+      throw error;
+    }
+  }
+
   async deleteMovie(id: string): Promise<{ id: string }> {
     try {
       const { rows: deletedMovie } = await pool.query<{ id: string }>(

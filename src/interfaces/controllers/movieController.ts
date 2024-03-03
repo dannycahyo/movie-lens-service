@@ -209,6 +209,37 @@ export class MovieController {
     }
   };
 
+  public updateMovie = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const movie = NewMovieDtoSchema.parse(req.body);
+      const updatedMovie = await this.movieUseCases.updateMovie(id, movie);
+      const updatedMovieDto = NewMovieDtoSchema.parse(
+        convertNestedObjectsToCamelCase(updatedMovie, [
+          "keywords",
+          "categories",
+          "languages",
+          "casts",
+          "trailers",
+          "links",
+          "countries",
+        ]),
+      );
+
+      sendSuccess({
+        res,
+        message: `Movie with id ${id} updated successfully.`,
+        data: updatedMovieDto,
+      });
+    } catch (error) {
+      sendError({
+        res,
+        message: "Error on movieController.updateMovie()",
+        error,
+      });
+    }
+  };
+
   public deleteMovie = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
